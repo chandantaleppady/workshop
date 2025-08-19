@@ -34,7 +34,16 @@ namespace StudentRegistryApp.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the student list view.</returns>
         public IActionResult Index()
         {
-            return View(_studentRepo.GetAllStudentsAsync().Result.Select(s => s.MapToStudentVm()));
+            List<StudentVm> students = new List<StudentVm>();
+            try
+            {
+                students = _studentRepo.GetAllStudentsAsync().Result.Select(s => s.MapToStudentVm()).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching students");
+            }
+            return View(students);
         }
 
         /// <summary>
