@@ -37,6 +37,7 @@ namespace StudentRegistryApp.Controllers
             List<StudentVm> students = new List<StudentVm>();
             try
             {
+                _logger.LogInformation("Fetching all students from the repository.");
                 students = _studentRepo.GetAllStudentsAsync().Result.Select(s => s.MapToStudentVm()).ToList();
             }
             catch (Exception ex)
@@ -57,12 +58,21 @@ namespace StudentRegistryApp.Controllers
         [HttpPost]
         public IActionResult Add(StudentVm student)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _studentRepo.AddStudentAsync(student.MapToStudent()).Wait();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    _studentRepo.AddStudentAsync(student.MapToStudent()).Wait();
+                    return RedirectToAction("Index");
+                }
+                return View(student);
             }
-            return View(student);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding a student");
+                ModelState.AddModelError("", "An error occurred while adding the student. Please try again.");
+                return RedirectToAction("Error", new { error = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -71,6 +81,12 @@ namespace StudentRegistryApp.Controllers
             var res = _dataUploadUtil.UploadData(_studentRepo.GetAllStudentsAsync().Result);
             string responseMessage = res.IsSuccess ? "Data uploaded successfully." : $"Error: {res.Error}";
             return Ok(responseMessage);
+        }
+
+        public IActionResult Error(string error)
+        {
+            ViewBag.ErrorMessage = error;
+            return View("Error");
         }
     }
 }

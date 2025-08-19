@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Extensions.Logging;
 using UtilsLib.Configs;
 using UtilsLib.Context;
 using UtilsLib.Repositories;
@@ -11,6 +13,10 @@ IConfiguration configuration = new ConfigurationBuilder()
     .Build();
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -37,6 +43,7 @@ app.Run();
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(sp => new SerilogLoggerProvider(Log.Logger, dispose: false));
     services.AddDbContextPool<AppDbContext>(option => option.UseSqlServer(configuration.GetConnectionString("EmployeeDb"), b => b.MigrationsAssembly("StudentRegistryApp"))); // Move this line here
     services.Configure<BlobConfigs>(configuration.GetSection("BlobConfigs"));
     services.AddOptions();
