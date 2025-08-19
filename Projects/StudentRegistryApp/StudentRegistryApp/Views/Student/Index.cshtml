@@ -1,0 +1,94 @@
+﻿@model IEnumerable<StudentRegistryApp.Models.StudentVm>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Home Page";
+}
+
+<div style="margin:10px;height:40px">
+    <span class="fw-bold fs-2 d-block text-center">Student registry</span>
+    <input type="button" style="float:right;margin-bottom:10px" class="btn btn-primary" value="Add"
+           onclick="showAddDialog()" />
+    <input type="button" style="float:right;margin-right:10px;margin-bottom:10px" class="btn btn-primary"
+           value="Upload data" onclick="uploadStudentData()" />
+</div>
+
+<div id="addStudentDialog" class="modal" tabindex="-1" style="display:none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addStudentForm" asp-action="Add" asp-controller="Student" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Student</h5>
+                    <button type="button" class="btn-close" onclick="closeAddDialog()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="Name" name="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="Age" name="Age" required min="1" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddDialog()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.Count() > 0)
+{
+    <table class="table table-bordered table-striped table-hover table-sm table-responsive">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in Model)
+            {
+                <tr>
+                    <td>@student.Id</td>
+                    <td>@student.Name</td>
+                    <td>@student.Email</td>
+                    <td>@student.Age</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script></script>
+    <script>
+        function showAddDialog() {
+            document.getElementById('addStudentDialog').style.display = 'block';
+        }
+        function closeAddDialog() {
+            document.getElementById('addStudentDialog').style.display = 'none';
+        }
+        function uploadStudentData() {
+
+            //make ajax call to upload data
+            fetch('/Student/UploadData', {
+                method: 'POST',
+            })
+                .then(response => response.text())
+                .then(response => {
+                    console.log(response);
+                    alert(response);
+                });
+
+        }
+    </script>
+}
